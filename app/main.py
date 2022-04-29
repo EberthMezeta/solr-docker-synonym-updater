@@ -6,25 +6,25 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.openapi.models import Response
 
-from app.synonym_updater import Updater
-
+from synonym_updater import Updater
+from typing import List
 
 update_queue = queue.Queue()
-app = FastAPI(docs_url="/")
-
-@app.post("/update")
-async def add_synonym_to_queue(word_list:list):
-    try:
-        unnaccented_words = [unidecode.unidecode(word) for word in word_list]
-        update_queue.put(unnaccented_words)
-        return Response(status_code=201)
-    except:
-        print(traceback.format_exc())
-        return []
 
 updater = Updater(update_queue)
 updater.setDaemon(True)
 updater.start()
+app = FastAPI(docs_url="/")
+
+@app.post("/update", status_code=201)
+async def add_synonym_to_queue(word_list:List):
+    try:
+        unnaccented_words = [unidecode.unidecode(word) for word in word_list]
+        update_queue.put(unnaccented_words)
+    except:
+        print(traceback.format_exc())
+    return []
+
 
 
 if __name__=="__main__":

@@ -8,15 +8,15 @@ from threading import Thread
 import requests
 
 from typing import Dict, List
-from app import constants
+import constants
 
 
 class Updater(Thread):
 
     def __init__(self, queue:queue.Queue):
         self.queue = queue
-        self.synonyms_by_line = Dict[int, List[str]]
-        self.lines_by_synonyms = Dict[str, int]
+        self.synonyms_by_line : Dict[int, List[str]] = {}
+        self.lines_by_synonyms : Dict[str, int] = {}
         self.lines = 0
         self.load_synonyms()
         Thread.__init__(self)
@@ -80,24 +80,25 @@ class Updater(Thread):
                     return
                      
             #if its a new one then ...
-            self.lines = self.lines + 1
             self.synonyms_by_line[self.lines] = list(dict.fromkeys(synonym_list))
 
             for synonym in synonym_list:
                 if synonym not in self.lines_by_synonyms:
                     self.lines_by_synonyms[synonym] = self.lines
+            self.lines = self.lines + 1
 
 
     def dump_synonyms(self):
 
         #cleanup leftover if exists
         if os.path.exists(f"{constants.CONF_PATH}synonyms2.txt"):
-            os.remove("synonyms2.txt")
+            os.remove(f"{constants.CONF_PATH}synonyms2.txt")
 
         #dump in memory synonyms to file
         with open(f"{constants.CONF_PATH}synonyms2.txt", "w") as textfile:
             for idx in self.synonyms_by_line:
-                line = ','.join(self.synonyms_by_line[idx]) + os.linesep
+                line = ','.join(self.synonyms_by_line[idx])
+                line = line + "\n"
                 textfile.write(line)
 
         #replace old synonyms with new synonyms making an atomic change
