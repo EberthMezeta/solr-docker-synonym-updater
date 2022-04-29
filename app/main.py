@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.openapi.models import Response
 
-from synonym_updater import Updater
+from app.synonym_updater import Updater
 from typing import List
 
 update_queue = queue.Queue()

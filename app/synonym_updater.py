@@ -8,7 +8,7 @@ from threading import Thread
 import requests
 
 from typing import Dict, List
-import constants
+from app import constants
 
 
 class Updater(Thread):
